@@ -1,77 +1,72 @@
 package villagegaulois;
 
 import personnages.Gaulois;
+import produits.IProduit;
 
-public class Etal {
+public class Etal <P extends IProduit> implements IEtal {
 	private Gaulois vendeur;
-	private String produit;
-	private int quantiteDebutMarche;
-	private int quantite;
-	private boolean etalOccupe = false;
-
-	public boolean isEtalOccupe() {
-		return etalOccupe;
+	private P[] produits;
+	private int nbProduits;
+	private int prix;
+		
+	public void installerVendeur(Gaulois vendeur, P[] produits, int prix){
+		this.vendeur = vendeur;
+		this.produits = produits;
+		nbProduits = produits.length;
+		this.prix = prix;
 	}
-
+	
+	
+	@Override
 	public Gaulois getVendeur() {
 		return vendeur;
 	}
 
-	public int getQuantite() {
-		return quantite;
+	@Override
+	public double donnerPrix() {
+		return prix;
 	}
-
-	public String getProduit() {
-		return produit;
-	}
-
-	public void occuperEtal(Gaulois vendeur, String produit, int quantite) {
-		this.vendeur = vendeur;
-		this.produit = produit;
-		this.quantite = quantite;
-		quantiteDebutMarche = quantite;
-		etalOccupe = true;
-	}
-
-	public boolean contientProduit(String produit) {
-		return this.produit.equals(produit);
-	}
-
-	public int acheterProduit(int quantiteAcheter) {
-		if (quantite == 0) {
-			quantiteAcheter = 0;
+	
+	@Override
+	public int contientProduit(String produit, int quantiteSouhaitee) {
+		int quantiteAVendre = 0;
+		if (nbProduits != 0 && this.produits[0].getNom().equals(produit)) {
+			if (nbProduits >= quantiteSouhaitee) {
+				quantiteAVendre = quantiteSouhaitee;
+			} else {
+				quantiteAVendre = nbProduits;
+			}
 		}
-		if (quantiteAcheter > quantite) {
-			quantiteAcheter = quantite;
-		}
-		if (etalOccupe) {
-			quantite -= quantiteAcheter;
-		}
-		return quantiteAcheter;
+		return quantiteAVendre;
 	}
-
-	public void libererEtal() {
-		etalOccupe = false;
-	}
-
-	/**
-	 * 
-	 * @param produit
-	 * @return donneesVente est un tableau de chaine contenant [0] : un boolean
-	 *         indiquant si l'étal est occupé [1] : nom du vendeur [2] : produit
-	 *         vendu [2] : quantité de produit à vendre au début du marché [4] :
-	 *         quantité de produit vendu
-	 */
-	public String[] etatEtal() {
-		String[] donneesVente = new String[5];
-		donneesVente[0] = String.valueOf(etalOccupe);
-		if (etalOccupe) {
-			donneesVente[1] = vendeur.getNom();
-			donneesVente[2] = produit;
-			donneesVente[3] = String.valueOf(quantiteDebutMarche);
-			donneesVente[4] = String.valueOf(quantiteDebutMarche - quantite);
+	
+	@Override
+	public double acheterProduit(int quantiteSouhaite) {
+		double prixPaye = 0;
+		for (int i = nbProduits - 1; i > nbProduits - quantiteSouhaite - 1 || i > 1; i--) {
+			prixPaye += produits[i].calculerPrix(prix);
 		}
-		return donneesVente;
+		if (nbProduits >= quantiteSouhaite) {
+			nbProduits -= quantiteSouhaite;
+		} else {
+			nbProduits = 0;
+		}
+		return prixPaye;
 	}
-
+	
+	@Override
+	public String etatEtal() {
+		StringBuilder chaine = new StringBuilder(vendeur.getNom());
+		if (nbProduits > 0) {
+				chaine.append(" vend ");
+				chaine.append(nbProduits + " produits :");
+				for (int i = 0; i < nbProduits; i++) {
+					chaine.append("\n- " + produits[i].description());
+				}
+		} else {
+			chaine.append(" n'a plus rien à vendre.");
+		}
+		chaine.append("\n");
+		return chaine.toString();
+	}
 }
