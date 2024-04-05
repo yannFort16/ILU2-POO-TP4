@@ -10,7 +10,15 @@ public class Scenario {
 	public static void main(String[] args) {
 
 		// TODO Partie 4 : creer de la classe anonyme Village
+		public interface IVillage {
+			public <P extends Produit> boolean installerVendeur(Etal<P> etal,
+					Gaulois vendeur, P[] produit, int prix);
+			
+			public DepenseMarchand[] acheterProduit(String produit,
+					int quantiteSouhaitee);
+		}
 
+		
 		// fin
 
 		Gaulois ordralfabetix = new Gaulois("Ordralfabétix", 9);
